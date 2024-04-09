@@ -25,7 +25,6 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from PIL import Image, ImageDraw, ImageFont
 import sys
 
-
 error_webhook = os.environ['error_url']
 dm_webhook = os.environ['dm_url']
 start_hook = os.environ['start_url']
@@ -52,10 +51,16 @@ intents.typing = False
 intents.presences = False
 
 # Owner's Discord ID
-owner = [1013851779886231685, 1095605756008611900, 1171117313945243708, 1152510743032377405, 1111276567038005309]
+owner = [
+    1013851779886231685, 1095605756008611900, 1171117313945243708,
+    1152510743032377405, 1111276567038005309
+]
 
 # Allowed User's
-allowed_users = [1013851779886231685, 1095605756008611900, 1171117313945243708,1152510743032377405]
+allowed_users = [
+    1013851779886231685, 1095605756008611900, 1171117313945243708,
+    1152510743032377405
+]
 
 
 class CustomContext(commands.Context):
@@ -118,7 +123,7 @@ load_prefixes()
 
 ALLOWED_USER_IDS = [
     1013851779886231685, 1013851779886231685, 1095605756008611900,
-    1171117313945243708,1152510743032377405
+    1171117313945243708, 1152510743032377405
 ]
 
 yellowish = 0xe7c770
@@ -133,9 +138,9 @@ bot.http_session = aiohttp.ClientSession()
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
-tenor_api_key = "AIzaSyCzj4UzAYXEHD0PyxTGfkcSazl0PjcHZPQ"
+tenor_api_key = os.environ['tenor']
 
-giphy_api_key = "ToFp55XoqCKDI6ZxmZ3coN4LseCexs05"
+giphy_api_key = os.environ['giphy']
 
 
 @bot.event
@@ -170,11 +175,13 @@ async def on_ready():
 
 # print('Bot Commands:')
 
+
 @bot.event
 async def on_ready():
   channel = bot.get_channel(1195042340490973204)
   time.sleep(1800)
   await channel.send("!!restart")
+
 
 #24/7 time spam
 @bot.event
@@ -309,6 +316,7 @@ def format_help(help_text):
 
   return help_text
 
+
 # Remove default 'help' command
 bot.remove_command('help')
 
@@ -326,7 +334,7 @@ async def send_help(ctx):
 
   # Exclude commands with "bot owner only" permission
   commands_list = [
-      cmd for cmd in bot.commands if not hasattr(cmd,'owner_only')
+      cmd for cmd in bot.commands if not hasattr(cmd, 'owner_only')
   ]
 
   # Sort commands alphabetically
@@ -1119,21 +1127,21 @@ def is_owner():
 # Custom command to list server names with their invite links
 @bot.command(name="server_list", aliases=['slo'], owner_only=True)
 async def list_servers(ctx):
- user = ctx.author
- if user == owner:
-  servers = bot.guilds
-  server_list = []
+  user = ctx.author
+  if user == owner:
+    servers = bot.guilds
+    server_list = []
 
-  for server in servers:
-    invite = await server.text_channels[0].create_invite(max_age=86400)
-    if invite:
-      server_list.append(f"{server.name}: {invite}")
+    for server in servers:
+      invite = await server.text_channels[0].create_invite(max_age=86400)
+      if invite:
+        server_list.append(f"{server.name}: {invite}")
 
-  if server_list:
-    server_list_text = "\n".join(server_list)
-    await ctx.send(f"```{server_list_text}```")
-  else:
-    await ctx.send("No invites could be created for any servers.")
+    if server_list:
+      server_list_text = "\n".join(server_list)
+      await ctx.send(f"```{server_list_text}```")
+    else:
+      await ctx.send("No invites could be created for any servers.")
 
 
 def generate_invite_code():
@@ -1201,15 +1209,15 @@ def is_user_support_team(user):
 
 @bot.command(name='directmessage', aliases=['dm'])
 async def dm(ctx, user_id: int, *, message: str):
-  bruh = [1013851779886231685,1152510743032377405,1111276567038005309,1167464602620145808]
+  bruh = 1013851779886231685
   author = ctx.author.id
   user = await bot.fetch_user(user_id)
   if bruh == author:
-   if user:
-    await user.send(f'{message}')
-    await ctx.send(f'Message sent to {user.name}')
-   else:
-    await ctx.send("User not found.")
+    if user:
+      await user.send(f'{message}')
+      await ctx.send(f'Message sent to {user.name}')
+    else:
+      await ctx.send("User not found.")
   else:
     await ctx.send("message owner is not allowed")
 
@@ -2049,13 +2057,15 @@ async def mybounty(ctx):
 
   await message.edit(embed=embed)
 
+
 owner_id_file = "owner.json"
 try:
   with open(owner_id_file, 'r') as file:
     owner_user = json.load(file)
 except FileNotFoundError:
   owner_user = []
-  
+
+
 @bot.command(name="restart", description="Restarts the bot.")
 async def restart(ctx):
   if ctx.author.id in owner_user:
