@@ -1,0 +1,60 @@
+# Replace these with your channel IDs and webhook URLs
+dm_log_channel_id = 
+error_log_channel_id = 
+join_log_channel_id = 
+mention_log_channel_id = 
+
+dm_webhook_url = 
+error_webhook_url = 
+join_webhook_url = 
+mention_webhook_url = 
+
+
+def create_embed(title, description, color):
+    return discord.Embed(title=title, description=description, color=color)
+
+@bot.event
+async def on_message(message):
+    if isinstance(message.channel, discord.DMChannel):
+        await log_to_webhook(dm_log_channel_id, dm_webhook_url, "Direct Message Log", f"**User:** {message.author.mention}\n**Message Content:** {message.content}", 0x00ff00)
+        print("{message.author.mention}\n**Message Content:** {message.content}")
+    await bot.process_commands(message)
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    error_message = f"An error occurred in event {event}:\n```{traceback.format_exc()}```"
+    await log_to_webhook(error_log_channel_id, error_webhook_url, "Error Log", error_message, 0xff0000)
+
+@bot.event
+async def on_guild_join(guild):
+    join_message = f"Bot has joined a new server: {guild.name} (ID: {guild.id})"
+    await log_to_webhook(join_log_channel_id, join_webhook_url, "Server Join Log", join_message, 0x0000ff)
+
+@bot.event
+async def on_message(message):
+    if bot.user.mentioned_in(message) and message.guild:
+        mention_message = f"Bot mentioned in another server:\n**Server:** {message.guild.name} (ID: {message.guild.id})\n**Channel:** {message.channel.name} (ID: {message.channel.id})\n**User:** {message.author.mention}\n**Message Content:** {message.content}"
+        await log_to_webhook(mention_log_channel_id, mention_webhook_url, "Mention Log", mention_message, 0xffff00)
+
+    await bot.process_commands(message)
+
+async def log_to_webhook(channel_id, webhook_url, title, description, color):
+    channel = bot.get_channel(channel_id)
+    if not channel:
+        return
+
+    embed = create_embed(title, description, color)
+
+    # Use webhook to send the log
+    await send_webhook(webhook_url, embed=embed)
+
+async def send_webhook(webhook_url, **kwargs):
+    data = {
+        "content": kwargs.get("content", None),
+        "username": kwargs.get("username", "Log Bot"),
+        "avatar_url": kwargs.get("avatar_url", ""),
+        "embeds": kwargs.get("embeds", []),
+    }
+
+    headers = {"Content-Type": "application/json"}
+    await requests.post(webhook_url, data=json.dumps(data), headers=headers)
