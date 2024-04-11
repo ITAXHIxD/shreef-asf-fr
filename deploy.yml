@@ -1,1 +1,24 @@
+name: Deploy to Replit
+on:
+  push:
+    branches:
+      - main
 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install Replit CLI
+        run: npm install -g repl.it
+
+      - name: Log in to Replit
+        run: replit login --token ${{ secrets.REPLIT_TOKEN }}
+      
+      - name: Push to Replit
+        run: replit push --force
+
+      - name: Deployed to Replit
+        run: echo "Bot deployed to Replit"
